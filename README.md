@@ -12,3 +12,5 @@ The package will have the following components, designed to be run separately or
 4. Telephone Module: PHI Generation Error Propagation
 > This module repeatedly converts between Unstructured and Structured PHI several times, to test the accuracy of the structured record when compared against a manually-verified ground truth. (Heh, get it, like the telephone game?)
 > To test the accuracy of unstructured <-> structured record conversion and the accuracy of different prompting choices to the LLM, and to determine the future need for fine-tuning based on whether RAG inserts false positives based on documents.  Better design choices will result in records that are more robust against type conversions.
+
+<img width="776" alt="image" src="https://github.com/user-attachments/assets/cdeccadf-b4a1-4230-b9a0-f98ae031d5f9" />
