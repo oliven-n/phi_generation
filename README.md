@@ -4,7 +4,7 @@ This package (which is currently under development) aims to improve upon existin
 The package will have the following components, designed to be run separately or sequentially as a pipeline: 
 1. Retrieval Augmented Generation Module 
 > Qualitiatively improve style and structure of unstructured Patient Health Records (e.g., Doctor's notest) through use of Retrieval Augmented Generation (RAG) to supplement model records.
-> *Note:* While quicker and with less data demands than fine-tuning a model for PHR production, it is possible that the.  For this reason and others, the error propagation module is included.
+> *Note:* While quicker and with less data demands than fine-tuning a model for PHR production, it is possible that the RAG cannot consider style decisions for making new documents, regardless of parameters, and possibly that it even hallucinates information into the response from the other medical records in the database.  For this reason and others, the error propagation module is included.
 2. Structured to Unstructured Record Module
 > Prompts LLM to infer a patient profile based on unstructured record.
 3. Unstructured to Structured Record Module
