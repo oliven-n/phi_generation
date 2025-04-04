@@ -1,0 +1,71 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs-info/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.tox/
+.cache
+.pytest_cache
+.coverage
+.venv
+venv/
+dist/
+
+# PyInstaller
+build
+dist
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb.bak
+*.py.swp # vim swap files
+*.orig # vim temporary files
+*.log # log files
+*.pkl # pickle files
+*.csv # csv files
+*.tsv # tsv files
+*.json # json files
+*.sqlite # sqlite files
+*.db # database files
+*.parquet # parquet files
+
+# OS or Editor related
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+.project
+.history
+.tmproj
+*.tmLanguage
+*.tmPreferences
+*.tmSnippet
+*.tmTheme
+Thumbs.db
