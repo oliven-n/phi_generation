@@ -28,3 +28,7 @@ langchain-openai
 openai
 chromadb
 python-dotenv
+pytest
+pandas
+ipykernel
+tabulate

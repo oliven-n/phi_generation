@@ -1,9 +1,14 @@
 # phi-generation/tests/test_utils.py
 
 import unittest
-import os
+#import os
 import pandas as pd
-from phi_generation.code_files.utils import csv_to_markdown_table, markdown_table_to_data_dir
+
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))  # Add parent directory to path
+from code_files.utils import csv_to_markdown_table, markdown_table_to_data_dir
+#from phi_generation.code_files.utils import csv_to_markdown_table, markdown_table_to_data_dir
 class TestUtils(unittest.TestCase):
 
     def setUp(self):
