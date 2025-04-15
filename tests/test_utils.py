@@ -7,7 +7,7 @@ import pandas as pd
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))  # Add parent directory to path
-from code_files.utils import csv_to_markdown_table, markdown_table_to_data_dir
+from phi_gen.utils import csv_to_markdown_table, markdown_table_to_data_dir
 #from phi_generation.code_files.utils import csv_to_markdown_table, markdown_table_to_data_dir
 class TestUtils(unittest.TestCase):
 
