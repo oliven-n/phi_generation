@@ -1,4 +1,5 @@
-# this most recent version of the code is the csv code just without so many print statements
+# refactored to be importable (this branch only)
+# code_files\rag_module\query_data.py
 import argparse
 import os
 from langchain_community.vectorstores import Chroma
@@ -37,15 +38,7 @@ def process_csv_file(csv_file_path):
         return f"Error processing CSV: {e}"
 
 
-def main():
-    print("--- Starting Query ---")
-    parser = argparse.ArgumentParser()
-    parser.add_argument("query_text", type=str, help="The query text.")
-    parser.add_argument("--csv_file", type=str, help="Path to the CSV file (optional).")
-    args = parser.parse_args()
-    query_text = args.query_text
-    csv_file_path = args.csv_file
-
+def query_rag_with_csv(query_text, csv_file_path=None):
     csv_data_description = process_csv_file(csv_file_path)
 
     try:
@@ -55,8 +48,7 @@ def main():
         results = db.similarity_search_with_relevance_scores(query_text, k=3)
 
         if not results or results[0][1] < 0.7:
-            print("Unable to find matching results.\n--- Query Ended ---\n")
-            return
+            return "Unable to find matching results."
 
         context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
         prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
@@ -68,15 +60,104 @@ def main():
         response_text = model.predict(prompt)
 
         sources = [doc.metadata.get("source", None) for doc, _score in results]
-        formatted_response = f"Response: {response_text}\nSources: {sources}\n--- Query Ended ---\n"
-        print(formatted_response)
+        formatted_response = f"Response: {response_text}\nSources: {sources}"
+        return formatted_response
 
     except Exception as e:
-        print(f"An error occurred during the query: {e}\n--- Query Aborted ---\n")
+        return f"An error occurred during the query: {e}"
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("query_text", type=str, help="The query text.")
+    parser.add_argument("--csv_file", type=str, help="Path to the CSV file (optional).")
+    args = parser.parse_args()
+    query_text = args.query_text
+    csv_file_path = args.csv_file
+    print("--- Starting Query ---")
+    print(query_rag_with_csv(query_text, csv_file_path))
+    print("--- Query Ended ---")
+
+
+# # this most recent version of the code is the csv code just without so many print statements
+# import argparse
+# import os
+# from langchain_community.vectorstores import Chroma
+# from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+# from langchain.prompts import ChatPromptTemplate
+# import pandas as pd  # Import pandas
+
+# CHROMA_PATH = "chroma"
+
+# PROMPT_TEMPLATE = """
+# Answer the question based only on the following context and CSV data (if provided):
+
+# {context}
+
+# ---
+
+# {csv_data_description}
+
+# ---
+
+# Answer the question based on the above context and CSV data: {question}
+# """
+
+
+# def process_csv_file(csv_file_path):
+#     if not csv_file_path:
+#         return ""
+
+#     try:
+#         df = pd.read_csv(csv_file_path)
+#         csv_description = f"CSV Data:\n{df.to_string()}"
+#         return csv_description
+#     except FileNotFoundError:
+#         return f"Error: CSV file not found at {csv_file_path}"
+#     except Exception as e:
+#         return f"Error processing CSV: {e}"
+
+
+# def main():
+#     print("--- Starting Query ---")
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("query_text", type=str, help="The query text.")
+#     parser.add_argument("--csv_file", type=str, help="Path to the CSV file (optional).")
+#     args = parser.parse_args()
+#     query_text = args.query_text
+#     csv_file_path = args.csv_file
+
+#     csv_data_description = process_csv_file(csv_file_path)
+
+#     try:
+#         api_key = os.environ.get("OPENAI_API_KEY")
+#         embedding_function = OpenAIEmbeddings(openai_api_key=api_key)
+#         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
+#         results = db.similarity_search_with_relevance_scores(query_text, k=3)
+
+#         if not results or results[0][1] < 0.7:
+#             print("Unable to find matching results.\n--- Query Ended ---\n")
+#             return
+
+#         context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
+#         prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+#         prompt = prompt_template.format(
+#             context=context_text, question=query_text, csv_data_description=csv_data_description
+#         )
+
+#         model = ChatOpenAI()
+#         response_text = model.predict(prompt)
+
+#         sources = [doc.metadata.get("source", None) for doc, _score in results]
+#         formatted_response = f"Response: {response_text}\nSources: {sources}\n--- Query Ended ---\n"
+#         print(formatted_response)
+
+#     except Exception as e:
+#         print(f"An error occurred during the query: {e}\n--- Query Aborted ---\n")
+
+
+# if __name__ == "__main__":
+#     main()
 
 # import argparse
 # from langchain_community.vectorstores import Chroma

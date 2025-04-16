@@ -13,7 +13,7 @@ class TestSTToUNSTModule(unittest.TestCase):
         # create a json with this information : ideas
         expected_type= str
         result = sun.generate_patient_report("dummy.csv")
-        self.assertIsInstance(result,expected_type, "LLM output is not string.")
+        self.assertIsInstance(result,expected_type, "LLM output is not string.pyto")
 
 #     # Tests the generate_patient_report function when the patient data in the CSV
 #     # contains relevant traits (value '1'). It mocks the file reading and the LLM's
