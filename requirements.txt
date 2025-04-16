@@ -32,3 +32,4 @@ pytest
 pandas
 ipykernel
 tabulate
+setuptools

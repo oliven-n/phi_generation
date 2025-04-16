@@ -52,3 +52,38 @@ def markdown_table_to_data_dir(markdown_table, filename="data_table.md"):
         return f"Markdown table written to {file_path}"
     except Exception as e:
         return f"Error writing markdown table to file: {e}"
+    
+    # code_files/utils.py
+
+import shutil
+import os
+
+def copy_markdown_to_rag_data(local_file_path):
+    """
+    Copies a Markdown file from a local path to the rag_module's data directory.
+
+    Args:
+        local_file_path (str): Path to the Markdown file to copy.
+    """
+
+    rag_data_dir = "code_files/rag_module/data"  # Relative path to the data directory
+
+    try:
+        # 1. Ensure the destination directory exists
+        os.makedirs(rag_data_dir, exist_ok=True)  # Create the directory if it doesn't exist
+
+        # 2. Extract the filename
+        file_name = os.path.basename(local_file_path)
+
+        # 3. Construct the destination path
+        destination_path = os.path.join(rag_data_dir, file_name)
+
+        # 4. Copy the file
+        shutil.copyfile(local_file_path, destination_path)
+
+        print(f"Successfully copied '{file_name}' to '{rag_data_dir}'")
+
+    except FileNotFoundError:
+        print(f"Error: File not found at {local_file_path}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
