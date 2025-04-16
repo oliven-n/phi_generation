@@ -33,3 +33,4 @@ pandas
 ipykernel
 tabulate
 setuptools
+anndata

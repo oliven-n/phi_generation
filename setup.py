@@ -13,7 +13,8 @@ setup(
         'pytest',               # New package
         'pandas',               # New package
         'ipykernel',            # Already included
-        'tabulate',             # New package
+        'tabulate',
+        'anndata'             # New package
     ],
     # ... other metadata
 )
