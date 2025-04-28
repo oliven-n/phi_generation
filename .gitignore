@@ -69,3 +69,9 @@ venv/
 *.tmSnippet
 *.tmTheme
 Thumbs.db
+
+
+# Miscellaneous Junk Files 
+tutorial_scrap.ipynb
+rag.ipynb
+tutorial_demo.ipynb
