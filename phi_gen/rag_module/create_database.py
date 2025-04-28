@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATA_PATH = r'C:\Users\noliv\phi_generation_repo_destination\phi_generation\code_files\rag_module\data'
+DATA_PATH = r'C:\Users\noliv\phi_generation_repo_destination\phi_generation\phi_gen\rag_module\data'
 CHROMA_PATH = "chroma"
 
 
@@ -167,7 +167,7 @@ if __name__ == "__main__":
 # load_dotenv()
 
 
-# DATA_PATH = r'C:\Users\noliv\phi-generation-repo-destination\phi-generation\code_files\rag_module\data'
+# DATA_PATH = r'C:\Users\noliv\phi-generation-repo-destination\phi-generation\phi_gen\rag_module\data'
 # CHROMA_PATH = "chroma"
 
 # def load_documents():

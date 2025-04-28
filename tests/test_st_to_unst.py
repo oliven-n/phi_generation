@@ -11,7 +11,7 @@ import anndata as ad
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Correct import
-from code_files.st_to_unst_module import st_to_unst as sun
+from phi_gen.st_to_unst_module import st_to_unst as sun
 
 class TestStToUnst(unittest.TestCase):
 

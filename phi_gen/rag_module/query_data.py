@@ -1,5 +1,5 @@
 # refactored to be importable (this branch only)
-# code_files\rag_module\query_data.py
+# phi_gen\rag_module\query_data.py
 import argparse
 import os
 from langchain_community.vectorstores import Chroma

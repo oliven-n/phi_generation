@@ -10,7 +10,7 @@ import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Correct imports
-from code_files.utils import csv_to_markdown_table, var_markdown_to_data_dir
+from phi_gen.utils import csv_to_markdown_table, var_markdown_to_data_dir
 
 class TestUtils(unittest.TestCase):
 
@@ -27,7 +27,7 @@ Charlie,35,Paris"""
         # Clean up test files
         if os.path.exists("test.csv"):
             os.remove("test.csv")
-        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "code_files", "rag_module", "data")
+        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "phi_gen", "rag_module", "data")
         test_file = os.path.join(data_dir, "patient_data.md")
         if os.path.exists(test_file):
             os.remove(test_file)
@@ -52,7 +52,7 @@ Charlie,35,Paris"""
         result = var_markdown_to_data_dir(markdown_table, "patient_data.md")
         self.assertTrue("Markdown written to" in result)
 
-        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "code_files", "rag_module", "data")
+        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "phi_gen", "rag_module", "data")
         test_file = os.path.join(data_dir, "patient_data.md")
         self.assertTrue(os.path.exists(test_file))
         with open(test_file, "r") as f:
@@ -73,7 +73,7 @@ Charlie,35,Paris"""
             raise OSError("Mock directory creation failure")
 
         # Step 1: Delete the target directory first
-        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "code_files", "rag_module", "data")
+        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "phi_gen", "rag_module", "data")
         if os.path.exists(data_dir):
             shutil.rmtree(data_dir)
 
@@ -100,7 +100,7 @@ Charlie,35,Paris"""
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # # Correct import
-# from code_files.utils import csv_to_markdown_table, markdown_table_to_data_dir
+# from phi_gen.utils import csv_to_markdown_table, markdown_table_to_data_dir
 
 # class TestUtils(unittest.TestCase):
 

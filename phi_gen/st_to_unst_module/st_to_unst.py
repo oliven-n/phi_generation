@@ -1,7 +1,7 @@
 
 # gpt refactored to make it modular (loop over each patient and update accordingly) and then i debugged. Seems to work now!!
 
-# code_files/st_to_unst_module/st_to_unst.py
+# phi_gen/st_to_unst_module/st_to_unst.py
 
 import os
 import numpy as np

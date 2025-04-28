@@ -1,6 +1,6 @@
 # this is the version modified to be importable
 
-# code_files\rag_module\compare_embeddings.py
+# phi_gen\rag_module\compare_embeddings.py
 import argparse
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings

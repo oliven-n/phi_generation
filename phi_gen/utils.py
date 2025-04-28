@@ -21,7 +21,7 @@ def csv_to_markdown_table(csv_file_path):
     except Exception as e:
         return f"Error converting CSV to markdown: {e}"
 
-def var_markdown_to_data_dir(markdown_content, filename="data_table.md", destination_dir="code_files/rag_module/data"):
+def var_markdown_to_data_dir(markdown_content, filename="data_table.md", destination_dir="phi_gen/rag_module/data"):
     """
     Writes markdown content to a file in the specified directory, overwriting if the file exists.
 
@@ -29,7 +29,7 @@ def var_markdown_to_data_dir(markdown_content, filename="data_table.md", destina
         markdown_content (str): The markdown content to write.
         filename (str): The filename to use for the markdown file.
         destination_dir (str, optional): The directory to write to.
-                                        Defaults to "code_files/data".
+                                        Defaults to "phi_gen/data".
                                         Can be a relative or absolute path.
 
     Returns:
@@ -53,7 +53,7 @@ def var_markdown_to_data_dir(markdown_content, filename="data_table.md", destina
     except Exception as e:
         return f"Error writing markdown to file: {e}"
 
-def local_markdown_to_data_dir(local_file_path, destination_dir="code_files/rag_module/data", enforce_md=True):
+def local_markdown_to_data_dir(local_file_path, destination_dir="phi_gen/rag_module/data", enforce_md=True):
     """
     Copies a file from a local path to the specified destination directory,
     optionally enforcing that the file being copied is a Markdown (.md) file.
@@ -61,7 +61,7 @@ def local_markdown_to_data_dir(local_file_path, destination_dir="code_files/rag_
     Args:
         local_file_path (str): The full path to the local file to copy.
         destination_dir (str, optional): The full path to the destination directory.
-                                        Defaults to "code_files/rag_module/data".
+                                        Defaults to "phi_gen/rag_module/data".
         enforce_md (bool, optional): If True, only copies files with the '.md' extension.
                                     Defaults to True.
 
@@ -131,7 +131,7 @@ def local_markdown_to_data_dir(local_file_path, destination_dir="code_files/rag_
 #     Args:
 #         local_file_path (str): Path to the Markdown file to copy.
 #     """
-#     rag_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "code_files", "rag_module", "data")
+#     rag_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "phi_gen", "rag_module", "data")
 #     result = copy_file_to_dir(local_file_path, rag_data_dir, enforce_md=True)
 #     print(result)
 
