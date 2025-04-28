@@ -28,8 +28,8 @@ def split_text(documents):
         return []  # Return an empty list if no documents
 
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=50,
+        chunk_size=2000,
+        chunk_overlap=500,
         length_function=len,
         separators=["\n\n", "\n", " ", ""],
         is_separator_regex=False,

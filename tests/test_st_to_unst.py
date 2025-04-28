@@ -1,96 +1,72 @@
-# tests/st_to_unst_tests.py
+# phi-generation/tests/test_st_to_unst.py
 
 import unittest
-from unittest.mock import patch, mock_open
-from io import StringIO
-import sys
 import os
-# it is better to import the py file and use the 
+import sys
+import pandas as pd
+import numpy as np
+import anndata as ad
+
+# Ensure parent path is included
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# Correct import
 from code_files.st_to_unst_module import st_to_unst as sun
 
-class TestSTToUNSTModule(unittest.TestCase):
-    def test_generate_patient_report(self):
-        # create a json with this information : ideas
-        expected_type= str
-        result = sun.generate_patient_report("dummy.csv")
-        self.assertIsInstance(result,expected_type, "LLM output is not string.pyto")
+class TestStToUnst(unittest.TestCase):
 
-#     # Tests the generate_patient_report function when the patient data in the CSV
-#     # contains relevant traits (value '1'). It mocks the file reading and the LLM's
-#     # prediction to control the input and output for verification.
-#     @patch('builtins.open', new_callable=mock_open, read_data="Name,Age,Gender,Number,Fever,Cough\nBob,42,Male,456,1,0\n")
-#     @patch('langchain.llms.OpenAI.predict')
-#     def test_generate_patient_report_with_relevant_traits(self, mock_predict, mock_file):
-#         mock_predict.side_effect = [
-#             "Patient Bob, age 42, male, assigned number 456 presents with initial observations warranting a comprehensive health assessment. Further investigation into the presence and duration of these indicators is crucial to formulating an accurate diagnosis and subsequent management plan. A thorough medical history, including any pre-existing conditions and relevant lifestyle factors, should be obtained to contextualize these findings. Additionally, a detailed physical examination, complemented by appropriate diagnostic testing, will be essential in elucidating the underlying etiology. Continuous monitoring of the patient's clinical course will guide the ongoing evaluation and refinement of the treatment strategy.",
-#             "Fever, characterized by an elevation in body temperature beyond the normal range, can be indicative of various underlying conditions, most commonly infectious processes. It is essential to ascertain the onset, duration, pattern, and associated symptoms to narrow down the potential causes. Management strategies typically involve addressing the underlying etiology while providing symptomatic relief to ensure patient comfort and prevent complications.",
-#         ]
-#         report = sun.generate_patient_report("dummy.csv")
-#         self.assertIn("Patient Bob, age 42, male, assigned number 456", report)
-#         self.assertIn("Fever", report)
-#         self.assertNotIn("Cough", report)
-#         self.assertEqual(mock_predict.call_count, 2) # One for intro, one for fever
+    def setUp(self):
+        # Create a small test CSV file for patients
+        self.test_csv_path = "test_patient_data.csv"
+        self.csv_content = """Patient Name,Patient Age,Diabetes,Hypertension
+Alice,30,1,0
+Bob,45,0,1
+Charlie,29,1,1"""
+        with open(self.test_csv_path, "w") as f:
+            f.write(self.csv_content)
 
-#     # Tests the generate_patient_report function when the patient data in the CSV
-#     # does not contain any relevant traits (all trait values are '0'). It mocks
-#     # the file reading and the LLM's prediction to ensure a basic introduction is generated.
-#     @patch('builtins.open', new_callable=mock_open, read_data="Name,Age,Gender,Number,Headache\nCharlie,28,Other,789,0\n")
-#     @patch('langchain.llms.OpenAI.predict')
-#     def test_generate_patient_report_without_relevant_traits(self, mock_predict, mock_file):
-#         mock_predict.side_effect = [
-#             "Patient Charlie, age 28, other, assigned number 789 presents for a routine evaluation. At this time, there are no specific indicators or positive findings reported that necessitate immediate concern or further in-depth analysis. A general overview of the patient's well-being suggests a stable baseline, and no acute symptoms have been identified. Continued monitoring and adherence to recommended health maintenance guidelines will be advised to ensure the ongoing health and wellness of the individual. Should any new symptoms or concerns arise, prompt medical attention should be sought for appropriate assessment and management."
-#         ]
-#         report = sun.generate_patient_report("dummy.csv")
-#         self.assertIn("Patient Charlie, age 28, other, assigned number 789", report)
-#         self.assertNotIn("Headache", report)
-#         self.assertEqual(mock_predict.call_count, 1) # Only for basic intro
+    def tearDown(self):
+        # Clean up test file
+        if os.path.exists(self.test_csv_path):
+            os.remove(self.test_csv_path)
 
-#     # Tests the main function's behavior when run with the default prompt (no
-#     # --custom_prompt argument provided). It mocks the command-line argument parsing,
-#     # the generate_patient_report function, and the print function to verify the
-#     # correct function call and output.
-#     @patch('argparse.ArgumentParser.parse_args', return_value=unittest.mock.Mock(csv_file='test_data.csv', custom_prompt=None))
-#     @patch('code_files.st_to_unst_module.st_to_unst.generate_patient_report')
-#     @patch('builtins.print')
-#     def test_main_with_default_prompt(self, mock_print, mock_generate, mock_args):
-#         mock_generate.return_value = "Generated report with default prompt."
-#         sun.main()
-#         mock_generate.assert_called_once_with('test_data.csv', None)
-#         mock_print.assert_called_with("\n--- Patient Health Record ---")
-#         mock_print.assert_called_with("Generated report with default prompt.")
+    def test_obs_matches_csv(self):
+        # Create AnnData
+        adata = sun.process_csv_and_create_anndata(self.test_csv_path, patient_id_columns=["Patient Name"])
 
-#     # Tests the main function's behavior when run with a custom prompt provided
-#     # via the --custom_prompt argument. It mocks the command-line argument parsing,
-#     # the generate_patient_report function, and the print function to verify the
-#     # correct function call and output.
-#     @patch('argparse.ArgumentParser.parse_args', return_value=unittest.mock.Mock(csv_file='custom.csv', custom_prompt='Custom prompt here'))
-#     @patch('code_files.st_to_unst_module.st_to_unst.generate_patient_report')
-#     @patch('builtins.print')
-#     def test_main_with_custom_prompt(self, mock_print, mock_generate, mock_args):
-#         mock_generate.return_value = "Generated report with custom prompt."
-#         sun.main()
-#         mock_generate.assert_called_once_with('custom.csv', 'Custom prompt here')
-#         mock_print.assert_called_with("\n--- Patient Health Record ---")
-#         mock_print.assert_called_with("Generated report with custom prompt.")
+        # Load original CSV
+        df_original = pd.read_csv(self.test_csv_path)
 
-#     # Tests the scenario where the generate_patient_report function is called
-#     # with a CSV file path that does not exist. It mocks the built-in open function
-#     # to raise a FileNotFoundError and verifies that the correct error message is returned.
-#     @patch('builtins.open', side_effect=FileNotFoundError)
-#     def test_generate_patient_report_file_not_found(self, mock_file):
-#         report = sun.generate_patient_report("nonexistent.csv")
-#         self.assertEqual(report, "Error: CSV file not found at nonexistent.csv")
+        # Check that .obs matches exactly
+        pd.testing.assert_frame_equal(adata.obs.reset_index(drop=True), df_original.reset_index(drop=True))
 
-#     # Tests the robustness of the generate_patient_report function when the CSV
-#     # data contains unexpected or invalid values (not '0' or '1') for the traits.
-#     # It mocks the file reading and checks if the basic patient information is still
-#     # present in the output. The LLM's handling of such input is not strictly tested here.
-#     @patch('builtins.open', new_callable=mock_open, read_data="Name,Age,Gender,Number,Trait\nEve,60,Female,999,invalid\n")
-#     def test_generate_patient_report_handles_invalid_data(self, mock_file):
-#         report = sun.generate_patient_report("invalid_data.csv")
-#         self.assertIn("Patient Eve, age 60, female, assigned number 999", report) # Basic info should still be present
+    def test_patient_name_length_limit(self):
+        # Create AnnData
+        adata = sun.process_csv_and_create_anndata(self.test_csv_path, patient_id_columns=["Patient Name"])
 
-if __name__ == '__main__':
-    unittest.main()
+        # Check that patient names (first column of adata.X) are less than 20 characters
+        patient_names = adata.X[:, 0]
+        for name in patient_names:
+            self.assertTrue(len(str(name)) <= 20, f"Patient name too long: {name}")
 
+    def test_unstructured_note_not_empty(self):
+        # Ensure unstructured doctor notes are generated and not empty
+        adata = sun.process_csv_and_create_anndata(self.test_csv_path, patient_id_columns=["Patient Name"])
 
+        doctor_notes = adata.X[:, 1]
+        for note in doctor_notes:
+            self.assertTrue(isinstance(note, str))
+            self.assertGreater(len(note.strip()), 0, "Generated doctor's note is empty!")
+
+    def test_ann_data_var_names_correct(self):
+        # Ensure var_names are set correctly
+        adata = sun.process_csv_and_create_anndata(self.test_csv_path, patient_id_columns=["Patient Name"])
+
+        self.assertEqual(list(adata.var_names), ["patient_name", "unstructured_note"])
+
+    def test_uns_metadata_filename_set(self):
+        # Check that the original CSV filename is stored in .uns
+        adata = sun.process_csv_and_create_anndata(self.test_csv_path, patient_id_columns=["Patient Name"])
+        
+        self.assertIn('csv_filename', adata.uns)
+        self.assertEqual(adata.uns['csv_filename'], os.path.basename(self.test_csv_path))

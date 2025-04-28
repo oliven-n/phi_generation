@@ -1,92 +1,79 @@
+
+# gpt refactored to make it modular (loop over each patient and update accordingly) and then i debugged. Seems to work now!!
+
 # code_files/st_to_unst_module/st_to_unst.py
 
-import argparse
-import csv
-from langchain.llms import OpenAI
+import os
+import numpy as np
+import pandas as pd
+import anndata as ad
+from dotenv import load_dotenv
+from langchain_openai import OpenAI  # UPDATED: new style import
 from langchain.prompts import PromptTemplate
+
+load_dotenv()
 
 DEFAULT_PROMPT = """You are a doctor. Create an extensive, non-list public health report of the patient, using the csv data, in paragraph format. This should contain an introduction of 200 words, then additional 100 word paragraphs for each "relevant" illness and medication listed in the table, where "relevant" information is represented by a "1". Begin with listing the Patient's name, age, gender, and assigned number. The conditions and medications should not be separated from one another."""
 
-def generate_patient_report(csv_file, custom_prompt=None):
+def generate_doctors_note(patient_row, trait_columns, custom_prompt=None):
     """
-    Generates a doctor's note-style patient health record from CSV data using an LLM.
-
-    Args:
-        csv_file (str): Path to the CSV file containing patient data.
-                        The first row should be headers (patient identifiers and traits).
-                        Subsequent rows represent patients with 1s (present) and 0s (absent) for traits.
-        custom_prompt (str, optional): A custom prompt for the LLM. Defaults to None.
-
-    Returns:
-        str: The generated patient health record.
+    Generate a doctor's note using the patient information.
     """
-    try:
-        with open(csv_file, 'r', newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            patient_data = list(reader)
+    llm = OpenAI(temperature=0.7)
 
-            if not patient_data:
-                return "Error: No patient data found in the CSV file."
+    patient_info = ", ".join([f"{col}: {patient_row[col]}" for col in patient_row.index if col not in trait_columns])
+    relevant_traits = [col for col in trait_columns if str(patient_row[col]) == '1']
 
-            # Assuming only one patient per CSV for simplicity
-            patient = patient_data[0]
+    if custom_prompt:
+        prompt_template = PromptTemplate.from_template(custom_prompt)
+    else:
+        prompt_template = PromptTemplate.from_template(DEFAULT_PROMPT)
 
-            patient_info = f"Patient Name: {patient.get('Name', 'N/A')}, "
-            patient_info += f"Age: {patient.get('Age', 'N/A')}, "
-            patient_info += f"Gender: {patient.get('Gender', 'N/A')}, "
-            patient_info += f"Assigned Number: {patient.get('Number', 'N/A')}\n\n"
+    prompt_text = prompt_template.format(patient_info=patient_info, relevant_traits=", ".join(relevant_traits))
 
-            relevant_conditions_medications = []
-            for trait, value in patient.items():
-                if value == '1' and trait not in ['Name', 'Age', 'Gender', 'Number']:
-                    relevant_conditions_medications.append(trait)
+    # UPDATED: use .invoke instead of .predict
+    doctors_note = llm.invoke(prompt_text)
+    return doctors_note
 
-            if custom_prompt:
-                prompt_template = PromptTemplate.from_template(custom_prompt)
-            else:
-                prompt_template = PromptTemplate.from_template(DEFAULT_PROMPT)
+def create_initial_dataframe():
+    """
+    Creates an empty pandas DataFrame for storing patient name and doctor's note.
+    """
+    df = pd.DataFrame(columns=["patient_name", "unstructured_note"])
+    return df
 
-            llm = OpenAI(temperature=0.7)  # You can adjust temperature and other LLM parameters
+def update_dataframe(df, patient_name, doctors_note):
+    """
+    Appends a new patient entry into the DataFrame.
+    """
+    new_entry = {"patient_name": patient_name, "unstructured_note": doctors_note}
+    df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
+    return df
 
-            prompt_input = {
-                "patient_info": patient_info,
-                "relevant_traits": ", ".join(relevant_conditions_medications)
-            }
+def process_csv_and_create_anndata(csv_file_path, patient_id_columns=["Patient Name"], custom_prompt=None):
+    """
+    Processes the input CSV, generates doctor's notes, and builds AnnData.
+    """
+    df_csv = pd.read_csv(csv_file_path)
 
-            # Dynamically construct the prompt based on relevant traits
-            if relevant_conditions_medications:
-                introduction_prompt = prompt_template.format(
-                    patient_info=prompt_input["patient_info"],
-                    relevant_traits=prompt_input["relevant_traits"]
-                )
-                report = llm.predict(introduction_prompt)
+    if df_csv.empty:
+        raise ValueError("Input CSV is empty.")
 
-                for trait in relevant_conditions_medications:
-                    specific_prompt_template = PromptTemplate.from_template(f"Describe the condition/medication '{trait}' in a paragraph of approximately 100 words in the context of a patient health record.")
-                    specific_prompt = specific_prompt_template.format(trait=trait)
-                    report += "\n\n" + llm.predict(specific_prompt)
-            else:
-                # If no relevant traits, just generate a basic introduction
-                basic_intro_template = PromptTemplate.from_template("Generate a 200-word introduction for a patient health record with the following basic information: {patient_info}")
-                basic_intro_prompt = basic_intro_template.format(patient_info=prompt_input["patient_info"])
-                report = llm.predict(basic_intro_prompt)
+    trait_columns = [col for col in df_csv.columns if col not in patient_id_columns]
 
-            return report
+    # Step 1: Create empty working DataFrame
+    working_df = create_initial_dataframe()
 
-    except FileNotFoundError:
-        return f"Error: CSV file not found at {csv_file}"
-    except Exception as e:
-        return f"An error occurred: {e}"
+    # Step 2: Generate doctor's note per patient
+    for idx, patient_row in df_csv.iterrows():
+        patient_name = " ".join([str(patient_row[col]) for col in patient_id_columns])
+        doctors_note = generate_doctors_note(patient_row, trait_columns, custom_prompt=custom_prompt)
+        working_df = update_dataframe(working_df, patient_name, doctors_note)
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate a patient health record from a CSV file using an LLM.")
-    parser.add_argument("csv_file", type=str, help="Path to the CSV file containing patient data.")
-    parser.add_argument("--custom_prompt", type=str, help="Optional custom prompt for the LLM.", default=None)
-    args = parser.parse_args()
+    # Step 3: Create AnnData object properly
+    adata = ad.AnnData(X=working_df.values)
+    adata.obs = df_csv.copy()
+    adata.var_names = working_df.columns.tolist()
+    adata.uns['csv_filename'] = os.path.basename(csv_file_path)
 
-    report = generate_patient_report(args.csv_file, args.custom_prompt)
-    print("\n--- Patient Health Record ---")
-    print(report)
-
-if __name__ == "__main__":
-    main()
+    return adata
